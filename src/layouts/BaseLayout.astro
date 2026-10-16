@@ -7,8 +7,8 @@ interface Props {
   description?: string;
 }
 const {
-  title = '慢慢 · Phoebe｜给变化一点时间',
-  description = 'Phoebe 的个人网站。记录心理治疗的心得、生活里的思考，以及技术与创作。',
+  title = 'README.me · Phoebe',
+  description = 'Phoebe 的个人网站。记录心理治疗的心得、生活里的观察，以及技术与创作。',
 } = Astro.props;
 const year = new Date().getFullYear();
 ---
@@ -18,32 +18,40 @@ const year = new Date().getFullYear();
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#f5f3ed" />
+    <meta name="theme-color" content="#0A0B0D" />
+    <meta name="color-scheme" content="dark" />
     <title>{title}</title>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&display=swap"
+    />
     {Astro.site && <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />}
   </head>
   <body>
-    <header class="header">
-      <a class="brand" href="/" aria-label="慢慢，返回首页">
-        <span class="brand-mark">m.</span>
-        <span>慢慢<span class="brand-separator">/</span><span class="brand-name">Phoebe</span></span>
-      </a>
-      <nav aria-label="主导航">
-        <a href="/#notes">笔记</a>
-        <a href="/#about">关于</a>
-        {SHOW_DRAFTS && (
-          <a class="write-button" href={NEW_NOTE_URL}>写一篇 <span aria-hidden="true">↗</span></a>
-        )}
-      </nav>
+    <header class="site-header">
+      <div class="wrap header-inner">
+        <a class="brand" href="/" aria-label="README.me，返回首页">README.me</a>
+        <nav aria-label="主导航">
+          <a href="/#notes">笔记</a>
+          <a href="/#about">关于</a>
+          {SHOW_DRAFTS && (
+            <a class="write-button" href={NEW_NOTE_URL}>写一篇 <span aria-hidden="true">↗</span></a>
+          )}
+        </nav>
+      </div>
     </header>
     <main id="home">
       <slot />
     </main>
-    <footer>
-      <a class="footer-brand" href="/">慢慢 / Phoebe</a>
-      <span>个人经历与思考 · 不作为诊断或治疗建议</span>
-      <span>© {year} Phoebe</span>
+    <footer class="site-footer">
+      <div class="wrap footer-inner">
+        <span>© {year} Phoebe</span>
+        <span class="footer-sans">个人经历与思考 · 不作为诊断或治疗建议</span>
+        <span class="footer-stack">astro · react · keystatic</span>
+      </div>
     </footer>
   </body>
 </html>

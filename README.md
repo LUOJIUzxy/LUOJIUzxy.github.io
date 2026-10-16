@@ -1,4 +1,4 @@
-# 慢慢 · Phoebe
+# README.me · Phoebe
 
 Personal website + notes from therapy. Built with **Astro 7**, **React 19** (interactive islands), **Keystatic** (CMS) and **Markdoc**, stored in a **private GitHub repo**.
 

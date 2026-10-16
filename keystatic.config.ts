@@ -28,7 +28,7 @@ const WRITING_PROMPTS = `不知道从哪里写？可以借用一个提纲：
 export default config({
   storage,
   ui: {
-    brand: { name: '慢慢 · Phoebe' },
+    brand: { name: 'README.me · Phoebe' },
     navigation: { 写作: ['notes'], 网站: ['site'] },
   },
   collections: {

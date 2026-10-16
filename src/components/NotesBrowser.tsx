@@ -33,81 +33,75 @@ export default function NotesBrowser({ notes, categories, writeUrl }: Props) {
   }, [notes, filter, query]);
 
   return (
-    <>
-      <div className="notes-toolbar">
-        <div className="filters" role="group" aria-label="按主题筛选">
-          {[ALL, ...categories].map((c) => (
-            <button
-              key={c}
-              type="button"
-              className={filter === c ? 'active' : undefined}
-              aria-pressed={filter === c}
-              onClick={() => setFilter(c)}
-            >
-              {c}
-            </button>
-          ))}
+    <div className="frame">
+      <div className="frame-inner notes-panel">
+        <div className="notes-toolbar">
+          <div className="filters" role="group" aria-label="按主题筛选">
+            {[ALL, ...categories].map((c) => (
+              <button
+                key={c}
+                type="button"
+                className={filter === c ? 'active' : undefined}
+                aria-pressed={filter === c}
+                onClick={() => setFilter(c)}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+          <label className="search">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.5-3.5" />
+            </svg>
+            <input
+              type="search"
+              placeholder="搜索标题和正文"
+              aria-label="搜索笔记"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          </label>
         </div>
-        <label className="search">
-          <span aria-hidden="true">⌕</span>
-          <input
-            type="search"
-            placeholder="找一篇笔记"
-            aria-label="搜索笔记"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </label>
-      </div>
 
-      <div aria-live="polite">
-        {shown.map((n) => (
-          <a key={n.slug} className="note-row" href={`/notes/${n.slug}/`}>
-            <span className="note-date">{n.date}</span>
-            <div className="note-content">
-              <span className="note-category">
-                {n.category}
-                {n.draft && <span className="draft-badge">草稿 · 仅本地可见</span>}
-              </span>
-              <h3>{n.title}</h3>
-              <p>{n.excerpt}</p>
-            </div>
-            <span className="note-arrow" aria-hidden="true">
-              ↗
-            </span>
-          </a>
-        ))}
-      </div>
+        <ul className="note-list" aria-live="polite">
+          {shown.map((n) => (
+            <li key={n.slug}>
+              <a className="note-row" href={`/notes/${n.slug}/`}>
+                <span className="note-date">{n.date}</span>
+                <span className="note-content">
+                  <span className="note-title">
+                    {n.title}
+                    {n.draft && <span className="draft-badge">draft</span>}
+                  </span>
+                  {n.excerpt && <span className="note-excerpt">{n.excerpt}</span>}
+                </span>
+                <span className="chip">{n.category}</span>
+                <span className="note-arrow" aria-hidden="true">↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
 
-      {shown.length === 0 && (
-        <div className="empty-state">
-          <div className="empty-number">00</div>
-          <div>
+        {shown.length === 0 && (
+          <div className="empty-state">
             {notes.length > 0 ? (
-              <>
-                <h3>暂时没有匹配的笔记。</h3>
-                <p>试试另一个主题，或换一个关键词。</p>
-              </>
+              <p>
+                <span className="mono">0 results</span> · 换个主题或关键词试试。
+              </p>
             ) : writeUrl ? (
-              <>
-                <h3>第一篇，从此刻开始。</h3>
-                <p>一句新的理解、一次小练习，或一个还没想明白的问题，都可以成为笔记的起点。</p>
-                <a className="text-button" href={writeUrl}>
-                  写下第一篇 <span aria-hidden="true">↗</span>
-                </a>
-              </>
+              <p>
+                <span className="mono">0 notes</span> · 第一篇，从此刻开始。{' '}
+                <a href={writeUrl}>写下第一篇 ↗</a>
+              </p>
             ) : (
-              <>
-                <h3>笔记正在慢慢写。</h3>
-                <p>第一篇还在路上，过些时候再来看看。</p>
-              </>
+              <p>
+                <span className="mono">0 notes</span> · 第一篇还在路上，过些时候再来看看。
+              </p>
             )}
           </div>
-          <span className="empty-decoration" aria-hidden="true">
-            ✳
-          </span>
-        </div>
-      )}
-    </>
+        )}
+      </div>
+    </div>
   );
 }

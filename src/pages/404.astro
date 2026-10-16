@@ -1,10 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+const path = Astro.url.pathname;
 ---
-<BaseLayout title="找不到这一页 · 慢慢 / Phoebe">
-  <section class="closing" style="padding-top:96px">
-    <span aria-hidden="true">✳</span>
-    <p>这一页，<br />也许还没写好。</p>
-    <a class="text-button" href="/">回到首页 <span aria-hidden="true">↗</span></a>
+<BaseLayout title="404 · README.me">
+  <section class="wrap not-found">
+    <div class="frame">
+      <div class="frame-inner terminal">
+        <p><span class="prompt" aria-hidden="true">$</span> <span class="cmd">open {path}</span></p>
+        <p class="tok-err">open: {path}: no such file or directory</p>
+      </div>
+    </div>
+    <a class="btn btn-primary" href="/">回到首页</a>
   </section>
 </BaseLayout>

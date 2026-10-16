@@ -20,14 +20,14 @@ const { note, newer, older } = Astro.props;
 const { Content } = await render(note);
 const isDraft = note.data.status === 'draft';
 ---
-<BaseLayout title={`${note.data.title} · 慢慢 / Phoebe`} description={excerptOf(note, 120)}>
+<BaseLayout title={`${note.data.title} · README.me`} description={excerptOf(note, 120)}>
   <article class="article">
     <a class="back-link" href="/#notes"><span aria-hidden="true">←</span> 回到笔记</a>
     <div class="article-meta">
-      <span>{CATEGORY_LABELS[note.data.category]}</span>
-      <span aria-hidden="true">/</span>
-      <time datetime={note.data.date.toISOString().slice(0, 10)}>{formatDate(note.data.date)}</time>
-      {isDraft && <span class="draft-badge">草稿 · 仅本地可见</span>}
+      <span class="chip">{CATEGORY_LABELS[note.data.category]}</span>
+      <time datetime={note.data.date.toISOString().slice(0, 10)}>{formatDate(note.data.date, '-')}</time>
+      <span class="article-path">notes/{note.id}.mdoc</span>
+      {isDraft && <span class="draft-badge">draft · 仅本地可见</span>}
     </div>
     <h1 class="article-title">{note.data.title}</h1>
     <div class="prose">
@@ -35,8 +35,8 @@ const isDraft = note.data.status === 'draft';
     </div>
     <p class="article-disclaimer">个人经历与思考，不作为诊断或治疗建议。</p>
     <nav class="article-nav" aria-label="更多笔记">
-      {newer ? <a href={`/notes/${newer.id}/`}><small>较新</small>{newer.data.title}</a> : <span></span>}
-      {older ? <a class="older" href={`/notes/${older.id}/`}><small>较早</small>{older.data.title}</a> : <span></span>}
+      {newer ? <a href={`/notes/${newer.id}/`}><small>← 较新</small>{newer.data.title}</a> : <span></span>}
+      {older ? <a class="older" href={`/notes/${older.id}/`}><small>较早 →</small>{older.data.title}</a> : <span></span>}
     </nav>
   </article>
 </BaseLayout>
