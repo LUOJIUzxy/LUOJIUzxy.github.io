@@ -1,7 +1,7 @@
 ---
-import { getEntry } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import HeroArt from '../components/HeroArt.astro';
+import ReadmeCard from '../components/ReadmeCard.astro';
 import NotesBrowser, { type NoteSummary } from '../components/NotesBrowser';
 import {
   CATEGORY_LABELS,
@@ -17,98 +17,117 @@ const notes = await getVisibleNotes();
 const summaries: NoteSummary[] = notes.map((n) => ({
   slug: n.id,
   title: n.data.title,
-  date: formatDate(n.data.date),
+  date: formatDate(n.data.date, '-'),
   category: CATEGORY_LABELS[n.data.category],
   excerpt: excerptOf(n),
   searchText: plainText(n.body).slice(0, 3000),
   draft: n.data.status === 'draft',
 }));
 
+// The README card always reports the public state, even in local dev.
+const published = (await getCollection('notes', ({ data }) => data.status === 'published')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+const updated = published[0] ? formatDate(published[0].data.date, '-') : null;
+
 const about = (await getEntry('site', 'about'))?.data;
+const categories = Object.values(CATEGORY_LABELS);
 
 const prompts = [
-  { no: '01 / 会谈之后', title: '今天，我带走了什么？', text: '一个有触动的片刻，一个新的理解，一个还想继续聊的问题。' },
-  { no: '02 / 日常练习', title: '把理解，放进生活。', text: '记录一次与治疗师约定的练习，以及尝试前后的真实感受。' },
-  { no: '03 / 偶尔回看', title: '有哪些细小的变化？', text: '留意重复出现的主题与变化，也允许有些问题暂时没有答案。' },
+  { key: '会谈之后', title: '今天，我带走了什么？', text: '一个有触动的片刻，一个新的理解，一个还想继续聊的问题。' },
+  { key: '日常练习', title: '把理解，放进生活。', text: '记录一次与治疗师约定的练习，以及尝试前后的真实感受。' },
+  { key: '偶尔回看', title: '有哪些细小的变化？', text: '留意重复出现的主题与变化，也允许有些问题暂时没有答案。' },
 ];
 ---
 <BaseLayout>
-  <section class="hero">
+  <section class="wrap hero">
     <div class="hero-copy">
-      <div class="eyebrow"><span class="tiny-dot"></span> PERSONAL NOTES &amp; SMALL DISCOVERIES</div>
-      <h1>给变化，<br />一点<span class="word-time">时间<svg viewBox="0 0 190 14" aria-hidden="true"><path d="M3 9Q80-2 184 5M12 12Q99 5 171 10"></path></svg></span>。</h1>
-      <p class="hero-description">你好，我是 Phoebe。<br />这里记录心理治疗的心得，也留下生活、技术与创作里的思考。慢慢写，慢慢理解自己。</p>
-      <div class="hero-actions">
-        <a class="primary-link" href="#notes">翻开笔记 <span aria-hidden="true">↓</span></a>
-        <a class="quiet-link" href="#about">认识我 <span aria-hidden="true">↗</span></a>
+      <p class="meta-line">~/phoebe · {published.length} 篇公开{updated && ` · 更新于 ${updated}`}</p>
+      <h1 class="two-tone">
+        你好，我是 Phoebe。
+        <span>软件工程师。这是我的 README：治疗笔记、生活观察，和正在做的东西。</span>
+      </h1>
+      <div class="actions">
+        <a class="btn btn-primary" href="#notes">读笔记</a>
+        <a class="btn btn-secondary" href="#about">关于我</a>
       </div>
     </div>
-    <HeroArt />
+    <ReadmeCard
+      tagline={about?.heading ?? '写代码，也写下生活。'}
+      categories={categories}
+      published={published.length}
+      updated={updated}
+    />
   </section>
 
-  <div class="intro-strip">
-    <span>观察 · 记录 · 回看</span>
-    <p>不急着给每一种感受找到答案。</p>
-    <span class="strip-number">01 — ongoing</span>
-  </div>
-
-  <section class="notes-section" id="notes">
-    <div class="section-top">
-      <div>
-        <span class="eyebrow">THE NOTEBOOK</span>
-        <h2>我的笔记<span class="heading-dot">.</span></h2>
+  <section class="section" id="notes">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="two-tone">笔记。<span>按主题筛选，或者直接搜。</span></h2>
+        <div class="section-aside">
+          <p>只有标成公开的笔记会出现在正式网站上。会谈里的理解，带回日常再看一遍。</p>
+          <p class="index-line">01 notes/ →</p>
+        </div>
       </div>
-      <p>把会谈中的理解，带回日常。<br />也给新的想法留个位置。</p>
+      <NotesBrowser
+        client:load
+        notes={summaries}
+        categories={categories}
+        writeUrl={SHOW_DRAFTS ? NEW_NOTE_URL : undefined}
+      />
+      {SHOW_DRAFTS && (
+        <p class="local-note"><span class="tok-const">dev</span> 本地预览：草稿也会显示在这里；正式网站只显示状态为“公开”的笔记。</p>
+      )}
     </div>
-    <NotesBrowser
-      client:load
-      notes={summaries}
-      categories={Object.values(CATEGORY_LABELS)}
-      writeUrl={SHOW_DRAFTS ? NEW_NOTE_URL : undefined}
-    />
-    {SHOW_DRAFTS && (
-      <div class="local-note">
-        <span class="tiny-dot"></span> 本地预览：草稿也会显示在这里；正式网站只显示状态为“公开”的笔记。
-      </div>
-    )}
   </section>
 
   {SHOW_DRAFTS && (
-    <section class="prompts-section">
-      <div class="prompt-intro">
-        <span class="eyebrow">A PLACE TO START · 仅本地可见</span>
-        <h2>不知道从哪里写？</h2>
-        <p>给每周的记录一个轻一点的起点。完整提纲在编辑器“正文”字段的说明里。</p>
-      </div>
-      <div class="prompt-grid">
-        {prompts.map((p) => (
-          <a class="prompt" href={NEW_NOTE_URL}>
-            <span class="prompt-no">{p.no}</span>
-            <h3>{p.title}</h3>
-            <p>{p.text}</p>
-            <span class="prompt-link">开始写 <span aria-hidden="true">↗</span></span>
-          </a>
-        ))}
+    <section class="section">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 class="two-tone">不知道从哪里写？<span>借一个提纲开始。</span></h2>
+          <div class="section-aside">
+            <p>仅本地可见。完整提纲在编辑器“正文”字段的说明里。</p>
+            <p class="index-line">02 prompts/ →</p>
+          </div>
+        </div>
+        <dl class="def-list">
+          {prompts.map((p) => (
+            <a class="def-row" href={NEW_NOTE_URL}>
+              <dt>{p.key}</dt>
+              <dd>
+                <span class="def-title">{p.title}</span>
+                <span class="def-text">{p.text}</span>
+              </dd>
+              <span class="def-arrow" aria-hidden="true">↗</span>
+            </a>
+          ))}
+        </dl>
       </div>
     </section>
   )}
 
-  <section class="about-section" id="about">
-    <div class="about-card">
-      <div class="monogram" aria-hidden="true">P<span>✳</span></div>
-      <div class="about-label">THE PERSON BEHIND THE NOTES</div>
+  <section class="section" id="about">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 class="two-tone">关于我。<span>{about?.heading}</span></h2>
+        <div class="section-aside">
+          <p>这一段在 Keystatic 的「关于我」里编辑。</p>
+          <p class="index-line">{SHOW_DRAFTS ? '03' : '02'} about/ →</p>
+        </div>
+      </div>
+      <div class="ruled-cols">
+        {about?.paragraphs.map((p) => (
+          <div class="ruled-col"><p>{p}</p></div>
+        ))}
+        {!!about?.tags.length && (
+          <div class="ruled-col">
+            <ul class="tags" aria-label="标签">
+              {about.tags.map((t) => <li>{t}</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
-    <div class="about-copy">
-      <span class="eyebrow">HELLO, I'M PHOEBE</span>
-      <h2>{about?.heading}</h2>
-      {about?.paragraphs.map((p) => <p>{p}</p>)}
-      <div class="about-tags">{about?.tags.map((t) => <span>{t}</span>)}</div>
-    </div>
-  </section>
-
-  <section class="closing">
-    <span aria-hidden="true">✳</span>
-    <p>留一点空间，<br />给正在成为的自己。</p>
-    {SHOW_DRAFTS && <a class="text-button" href={NEW_NOTE_URL}>写下今天 <span aria-hidden="true">↗</span></a>}
   </section>
 </BaseLayout>

@@ -1,0 +1,68 @@
+---
+/**
+ * Hero visual: the site's own README.me, built from real data
+ * (categories from the schema, counts and dates from published notes).
+ */
+interface Props {
+  tagline: string;
+  categories: string[];
+  published: number;
+  updated: string | null;
+}
+const { tagline, categories, published, updated } = Astro.props;
+
+type Seg = [cls: 'h' | 'c' | 'k' | 'n' | 't', text: string];
+const lines: Seg[][] = [
+  [['h', '# Phoebe']],
+  [],
+  [['c', `> ${tagline}`]],
+  [],
+  [['h', '## 在写什么']],
+  [],
+  ...categories.map((c): Seg[] => [['k', '- '], ['t', c]]),
+  [],
+  [['h', '## 状态']],
+  [],
+  [['k', '- '], ['t', '公开笔记：'], ['n', `\`${published}\``]],
+  [['k', '- '], ['t', '最近更新：'], ['n', `\`${updated ?? '—'}\``]],
+  [['k', '- '], ['t', '草稿：只留在本地，不进公开构建']],
+];
+const source = lines.map((l) => l.map((s) => s[1]).join('')).join('\n');
+---
+<div class="frame hero-frame">
+  <figure class="frame-inner code-block">
+    <figcaption class="code-chrome">
+      <span class="code-file">README.me</span>
+      <span class="code-lang">Markdown</span>
+      <button class="copy-btn" type="button" aria-label="复制 README.me" data-copy={source}>
+        <svg class="i-copy" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
+        <svg class="i-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+      </button>
+      <span class="sr-only" aria-live="polite" data-copy-status></span>
+    </figcaption>
+    <pre class="code" lang="markdown"><code>{lines.map((segs, i) => (
+      <span class="line"><span class="ln" aria-hidden="true">{i + 1}</span>{segs.map(([cls, text]) => <span class={`tok-${cls}`}>{text}</span>)}</span>
+    ))}</code></pre>
+  </figure>
+</div>
+
+<script>
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
+    const status = btn.parentElement?.querySelector<HTMLElement>('[data-copy-status]');
+    let t: ReturnType<typeof setTimeout> | undefined;
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy ?? '');
+      } catch {
+        return;
+      }
+      btn.classList.add('copied');
+      if (status) status.textContent = '已复制';
+      clearTimeout(t);
+      t = setTimeout(() => {
+        btn.classList.remove('copied');
+        if (status) status.textContent = '';
+      }, 1600);
+    });
+  }
+</script>
