@@ -1,0 +1,53 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { chip, draftBadge, langBadge } from './ui';
+import { ui, homePath, notePath, type Locale } from '../i18n';
+import { CATEGORY_LABELS, excerptOf, formatDate, type Note } from '../lib/notes';
+
+interface Props {
+  locale: Locale;
+  note: Note;
+  newer?: Note;
+  older?: Note;
+}
+const { locale, note, newer, older } = Astro.props;
+const t = ui[locale];
+const { Content } = await render(note);
+const isDraft = note.data.status === 'draft';
+const noteLang = ui[note.data.lang].htmlLang;
+const navLink = 'flex flex-col gap-1 font-medium transition-colors hover:text-fn sm:max-w-[48%]';
+const navSmall = 'font-mono text-xs font-normal text-fg-3';
+---
+
+<BaseLayout locale={locale} title={`${note.data.title} · README.me`} description={excerptOf(note, 120)}>
+  <article class="mx-auto max-w-[720px] px-4 pt-8 pb-12 sm:px-8 sm:pt-14 sm:pb-18">
+    <a class="text-sm text-fg-2 transition-colors hover:text-fg" href={`${homePath(locale)}#notes`}><span aria-hidden="true">←</span> {t.article.back}</a>
+    <div class="mt-10 flex flex-wrap items-center gap-x-3.5 gap-y-2.5 font-mono text-[13px] text-fg-3">
+      <span class={chip}>{CATEGORY_LABELS[locale][note.data.category]}</span>
+      <time datetime={note.data.date.toISOString().slice(0, 10)}>{formatDate(note.data.date, '-')}</time>
+      <span>notes/{note.id}.mdoc</span>
+      {note.data.lang !== locale && <span class={langBadge}>{t.otherLang}</span>}
+      {isDraft && <span class={draftBadge}>{t.article.draft}</span>}
+    </div>
+    <div lang={noteLang}>
+      <h1 class="mt-4 mb-9 text-[clamp(30px,4vw,42px)] leading-[1.3] font-semibold tracking-[-0.01em] [overflow-wrap:anywhere]">{note.data.title}</h1>
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+    <p class="mt-12 border-t border-line pt-[18px] text-[13px] text-fg-3">{t.article.disclaimer}</p>
+    <nav class="mt-7 flex flex-col justify-between gap-6 sm:flex-row" aria-label={t.article.more}>
+      {newer ? (
+        <a class={navLink} href={notePath(locale, newer.id)}>
+          <small class={navSmall}>{t.article.newer}</small><span lang={ui[newer.data.lang].htmlLang}>{newer.data.title}</span>
+        </a>
+      ) : <span></span>}
+      {older ? (
+        <a class={`${navLink} sm:ml-auto sm:text-right`} href={notePath(locale, older.id)}>
+          <small class={navSmall}>{t.article.older}</small><span lang={ui[older.data.lang].htmlLang}>{older.data.title}</span>
+        </a>
+      ) : <span></span>}
+    </nav>
+  </article>
+</BaseLayout>

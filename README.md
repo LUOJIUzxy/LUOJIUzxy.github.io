@@ -29,6 +29,18 @@ npm run dev
 - Site: http://localhost:4321
 - Editor: http://localhost:4321/keystatic. Saving writes `.mdoc` files into `src/content/notes/`. Commit and push to publish.
 
+## Styling
+
+Tailwind CSS v4 (via `@tailwindcss/vite`). Design tokens live in the `@theme` block of `src/styles/global.css`: `bg-canvas`, `bg-surface`, `border-line`, `text-fg` / `text-fg-2` / `text-fg-3`, and the syntax colours `text-kw`, `text-fn`, `text-str`… Note bodies (Markdoc) are styled by the `.prose` rules in the same file. Shared class strings (buttons, chips, badges) are in `src/components/ui.ts`.
+
+## Languages
+
+Chinese is the default and lives at `/`; English mirrors every page under `/en/` (the 中文 / EN switch in the header links between them).
+
+- Interface text for both languages is in `src/i18n.ts`.
+- Notes are not translated. Each note has a **语言** field (中文 / English); both language versions list every public note, with a small badge on notes written in the other language.
+- The About section has optional English fields in Keystatic (标题 / 介绍段落 / 标签（English）). Left empty, the English page shows the Chinese text.
+
 ## Drafts and privacy
 
 Each note has a **状态** field:

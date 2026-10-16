@@ -1,19 +1,28 @@
 ---
 import '../styles/global.css';
+import FuzzyLogo from '../components/FuzzyLogo';
 import { NEW_NOTE_URL, SHOW_DRAFTS } from '../lib/notes';
+import { ui, homePath, localeFromPath, localizePath, type Locale } from '../i18n';
 
 interface Props {
+  locale?: Locale;
   title?: string;
   description?: string;
+  /** Set false on pages that have no counterpart in the other language (404). */
+  alternates?: boolean;
 }
-const {
-  title = 'README.me · Phoebe',
-  description = 'Phoebe 的个人网站。记录心理治疗的心得、生活里的观察，以及技术与创作。',
-} = Astro.props;
+const path = Astro.url.pathname;
+const { locale = localeFromPath(path), title = 'README.me · Phoebe', alternates = true } = Astro.props;
+const t = ui[locale];
+const description = Astro.props.description ?? t.description;
+const other: Locale = locale === 'zh' ? 'en' : 'zh';
+const home = homePath(locale);
 const year = new Date().getFullYear();
+const navLink = 'text-fg-2 transition-colors hover:text-fg';
+const abs = (p: string) => (Astro.site ? new URL(p, Astro.site).href : p);
 ---
 <!doctype html>
-<html lang="zh-CN">
+<html lang={t.htmlLang}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -28,30 +37,76 @@ const year = new Date().getFullYear();
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&display=swap"
     />
-    {Astro.site && <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />}
+    {Astro.site && <link rel="canonical" href={abs(path)} />}
+    {alternates && (
+      <>
+        <link rel="alternate" hreflang="zh-CN" href={abs(localizePath(path, 'zh'))} />
+        <link rel="alternate" hreflang="en" href={abs(localizePath(path, 'en'))} />
+        <link rel="alternate" hreflang="x-default" href={abs(localizePath(path, 'zh'))} />
+      </>
+    )}
   </head>
-  <body>
-    <header class="site-header">
-      <div class="wrap header-inner">
-        <a class="brand" href="/" aria-label="README.me，返回首页">README.me</a>
-        <nav aria-label="主导航">
-          <a href="/#notes">笔记</a>
-          <a href="/#about">关于</a>
+  <body class="bg-canvas font-sans text-base leading-[1.6] text-fg antialiased">
+    <header class="sticky top-0 z-10 border-b border-line bg-canvas">
+      <div class="page-wrap flex min-h-15 items-center gap-6">
+        <a class="inline-flex min-h-11 items-center font-mono text-[15px] font-medium transition-colors hover:text-fn" href={home} aria-label="README.me">
+          <FuzzyLogo client:only="react"><span slot="fallback">README.me</span></FuzzyLogo>
+        </a>
+        <nav class="ml-auto flex items-center gap-4 text-sm sm:gap-6" aria-label={locale === 'en' ? 'Main' : '主导航'}>
+          <a class={navLink} href={`${home}#notes`}>{t.nav.notes}</a>
+          <a class={navLink} href={`${home}#about`}>{t.nav.about}</a>
           {SHOW_DRAFTS && (
-            <a class="write-button" href={NEW_NOTE_URL}>写一篇 <span aria-hidden="true">↗</span></a>
+            <a class="hidden rounded-lg border border-line-strong px-3 py-1.5 sm:inline-block" href={NEW_NOTE_URL}>{t.nav.write} <span aria-hidden="true">↗</span></a>
           )}
+          <a
+            class="inline-flex min-h-8 min-w-11 items-center justify-center rounded-md border border-line px-2.5 text-[13px] transition-colors hover:border-line-strong"
+            href={alternates ? localizePath(path, other) : homePath(other)}
+            hreflang={ui[other].htmlLang}
+            lang={ui[other].htmlLang}
+            aria-label={t.nav.switchLabel}
+          >{t.nav.switchTo}</a>
         </nav>
       </div>
     </header>
-    <main id="home">
-      <slot />
-    </main>
-    <footer class="site-footer">
-      <div class="wrap footer-inner">
-        <span>© {year} Phoebe</span>
-        <span class="footer-sans">个人经历与思考 · 不作为诊断或治疗建议</span>
-        <span class="footer-stack">astro · react · keystatic</span>
-      </div>
-    </footer>
+    <div class="relative isolate" data-backdrop-root>
+      <main id="home">
+        <slot />
+      </main>
+      <footer class="mt-6 border-t border-line">
+        <div class="page-wrap flex flex-wrap gap-x-7 gap-y-2.5 pt-7 pb-10 font-mono text-[12.5px] text-fg-3">
+          <span>© {year} Phoebe</span>
+          <span class="font-sans text-[13px]">{t.footer.disclaimer}</span>
+          <span class="sm:ml-auto">astro · react · keystatic</span>
+        </div>
+      </footer>
+      {/* Page-supplied background for the bottom of the page. The script below starts it at
+          the element marked [data-backdrop-start] (plus that attribute's px offset) and runs it
+          to the bottom; the mask fades it in so it never starts at a hard edge. */}
+      {Astro.slots.has('backdrop') && (
+        <div
+          class="pointer-events-none absolute inset-x-0 bottom-0 -z-10 [mask-image:linear-gradient(to_bottom,transparent,#000_240px)]"
+          style="top: 100%"
+          data-backdrop
+          aria-hidden="true"
+        >
+          <slot name="backdrop" />
+        </div>
+      )}
+    </div>
   </body>
 </html>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-backdrop-root]');
+  const backdrop = root?.querySelector<HTMLElement>('[data-backdrop]');
+  const anchor = root?.querySelector<HTMLElement>('[data-backdrop-start]');
+  if (root && backdrop && anchor) {
+    const offset = Number(anchor.dataset.backdropStart) || 0;
+    const place = () => {
+      const top = anchor.getBoundingClientRect().top - root.getBoundingClientRect().top + offset;
+      backdrop.style.top = `${Math.max(0, top)}px`;
+    };
+    new ResizeObserver(place).observe(root);
+    place();
+  }
+</script>

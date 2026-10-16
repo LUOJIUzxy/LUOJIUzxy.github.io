@@ -10,6 +10,7 @@ const notes = defineCollection({
     date: z.coerce.date(),
     category: z.enum(['therapy', 'life', 'making']).default('therapy'),
     excerpt: z.string().optional().default(''),
+    lang: z.enum(['zh', 'en']).default('zh'),
   }),
 });
 
@@ -19,6 +20,9 @@ const site = defineCollection({
     heading: z.string(),
     paragraphs: z.array(z.string()).default([]),
     tags: z.array(z.string()).default([]),
+    heading_en: z.string().optional().default(''),
+    paragraphs_en: z.array(z.string()).default([]),
+    tags_en: z.array(z.string()).default([]),
   }),
 });
 

@@ -1,15 +1,22 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-const path = Astro.url.pathname;
+import Frame from '../components/Frame.astro';
+import { btnPrimary, btnSecondary } from '../components/ui';
 ---
-<BaseLayout title="404 · README.me">
-  <section class="wrap not-found">
-    <div class="frame">
-      <div class="frame-inner terminal">
-        <p><span class="prompt" aria-hidden="true">$</span> <span class="cmd">open {path}</span></p>
-        <p class="tok-err">open: {path}: no such file or directory</p>
-      </div>
+<BaseLayout title="404 · README.me" alternates={false}>
+  <section class="page-wrap flex flex-col items-start gap-7 py-24">
+    <Frame class="w-full max-w-[640px]" innerClass="px-5 py-[18px] font-mono text-sm leading-[1.6] text-fg-2">
+      <p class="[overflow-wrap:anywhere]"><span class="text-fg-3 select-none" aria-hidden="true">$</span> <span class="text-fg">open <span data-path>this-page</span></span></p>
+      <p class="text-err [overflow-wrap:anywhere]">open: <span data-path>this-page</span>: no such file or directory</p>
+    </Frame>
+    <div class="flex flex-wrap gap-3">
+      <a class={btnPrimary} href="/">回到首页</a>
+      <a class={btnSecondary} href="/en/" lang="en">Back home</a>
     </div>
-    <a class="btn btn-primary" href="/">回到首页</a>
   </section>
 </BaseLayout>
+
+<script>
+  // The 404 page is static, so fill in the path that was actually requested.
+  for (const el of document.querySelectorAll('[data-path]')) el.textContent = location.pathname;
+</script>

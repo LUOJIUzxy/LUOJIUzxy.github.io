@@ -3,48 +3,62 @@
  * Hero visual: the site's own README.me, built from real data
  * (categories from the schema, counts and dates from published notes).
  */
+import Frame from './Frame.astro';
+import type { UI } from '../i18n';
+
 interface Props {
+  t: UI['readme'];
   tagline: string;
   categories: string[];
   published: number;
   updated: string | null;
+  class?: string;
 }
-const { tagline, categories, published, updated } = Astro.props;
+const { t, tagline, categories, published, updated, class: className } = Astro.props;
 
 type Seg = [cls: 'h' | 'c' | 'k' | 'n' | 't', text: string];
+const TOKEN: Record<Seg[0], string> = { h: 'text-fn', c: 'text-cmt', k: 'text-kw', n: 'text-num', t: 'text-fg' };
 const lines: Seg[][] = [
   [['h', '# Phoebe']],
   [],
   [['c', `> ${tagline}`]],
   [],
-  [['h', '## 在写什么']],
+  [['h', t.writing]],
   [],
   ...categories.map((c): Seg[] => [['k', '- '], ['t', c]]),
   [],
-  [['h', '## 状态']],
+  [['h', t.status]],
   [],
-  [['k', '- '], ['t', '公开笔记：'], ['n', `\`${published}\``]],
-  [['k', '- '], ['t', '最近更新：'], ['n', `\`${updated ?? '—'}\``]],
-  [['k', '- '], ['t', '草稿：只留在本地，不进公开构建']],
+  [['k', '- '], ['t', t.published], ['n', `\`${published}\``]],
+  [['k', '- '], ['t', t.updated], ['n', `\`${updated ?? '—'}\``]],
+  [['k', '- '], ['t', t.drafts]],
 ];
 const source = lines.map((l) => l.map((s) => s[1]).join('')).join('\n');
 ---
-<div class="frame hero-frame">
-  <figure class="frame-inner code-block">
-    <figcaption class="code-chrome">
-      <span class="code-file">README.me</span>
-      <span class="code-lang">Markdown</span>
-      <button class="copy-btn" type="button" aria-label="复制 README.me" data-copy={source}>
-        <svg class="i-copy" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
-        <svg class="i-check" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+<Frame class={className}>
+  <figure>
+    <figcaption class="relative flex min-h-11 items-center gap-3 border-b border-line pr-1 pl-4 font-mono">
+      <span class="text-[13px] text-fg-2">README.me</span>
+      <span class="ml-auto text-xs text-fg-3">Markdown</span>
+      <button
+        class="group inline-flex size-11 items-center justify-center text-fg-3 transition-colors hover:text-fg-2"
+        type="button"
+        aria-label={t.copy}
+        data-copy={source}
+        data-copied-label={t.copied}
+      >
+        <svg class="group-data-copied:hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
+        <svg class="hidden text-str group-data-copied:block" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
       </button>
       <span class="sr-only" aria-live="polite" data-copy-status></span>
     </figcaption>
-    <pre class="code" lang="markdown"><code>{lines.map((segs, i) => (
-      <span class="line"><span class="ln" aria-hidden="true">{i + 1}</span>{segs.map(([cls, text]) => <span class={`tok-${cls}`}>{text}</span>)}</span>
+    <pre
+      class="overflow-x-auto py-[18px] pr-5 pb-[22px] font-mono text-[13px] leading-[1.6] [font-variant-ligatures:none] max-sm:[mask-image:linear-gradient(to_left,transparent,#000_24px)] sm:text-sm"
+      lang="markdown"><code class="block min-w-max">{lines.map((segs, i) => (
+      <span class="block min-h-[1.6em] whitespace-pre"><span class="inline-block w-8 pr-2.5 text-right text-fg-4 select-none sm:w-11 sm:pr-[18px]" aria-hidden="true">{i + 1}</span>{segs.map(([cls, text]) => <span class={TOKEN[cls]}>{text}</span>)}</span>
     ))}</code></pre>
   </figure>
-</div>
+</Frame>
 
 <script>
   for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
@@ -56,11 +70,11 @@ const source = lines.map((l) => l.map((s) => s[1]).join('')).join('\n');
       } catch {
         return;
       }
-      btn.classList.add('copied');
-      if (status) status.textContent = '已复制';
+      btn.dataset.copied = '';
+      if (status) status.textContent = btn.dataset.copiedLabel ?? '';
       clearTimeout(t);
       t = setTimeout(() => {
-        btn.classList.remove('copied');
+        delete btn.dataset.copied;
         if (status) status.textContent = '';
       }, 1600);
     });
