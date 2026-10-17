@@ -4,7 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ReadmeCard from './ReadmeCard.astro';
 import GlowCursor from './GlowCursor';
 import TextType from './TextType';
-import Antigravity from './Antigravity';
+import WebThreads from './WebThreads';
 import SectionHead from './SectionHead.astro';
 import { btnPrimary, btnSecondary } from './ui';
 import NotesBrowser, { type NoteSummary } from './NotesBrowser';
@@ -169,16 +169,36 @@ const aboutCol = 'flex-[1_1_100%] sm:flex-[1_1_260px] sm:border-l sm:border-line
     </div>
   </section>
 
-  <Antigravity
+  <WebThreads
     slot="backdrop"
     client:visible
-    colors={['#5227FF', '#FF9FFC', '#B497CF']}
-    count={2200}
-    particleSize={0.8}
-    magnetRadius={8}
-    ringRadius={6}
-    ambient={0.25}
-    opacity={0.75}
-    colorSpeed={0.03}
+    colors={['#3b82f6', '#06b6d4']}
+    coreColor="#FFFFFF"
+    threadCount={9}
+    spread={0.22}
+    lightMode={false}
+    speed={0.2}
+    frequency={5}
+    taper={0.3}
+    position={0.5}
+    pinch={0.5}
+    nodes={3}
+    angle={-8}
+    glow={0.009}
+    falloff={0.6}
+    thickness={0.7}
+    brightness={0.4}
+    opacity={1}
+    depth={0.6}
+    pulses={0}
+    mirror
+    shimmer={false}
+    fade={0}
+    grain={0.05}
+    intro
+    mouseInteraction
+    mouseStrength={0.5}
+    pulseOnClick
+    paused={false}
   />
 </BaseLayout>
