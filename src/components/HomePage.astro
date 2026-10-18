@@ -63,7 +63,7 @@ const aboutCol = 'flex-[1_1_100%] sm:flex-[1_1_260px] sm:border-l sm:border-line
     <GlowCursor
       client:idle
       className="absolute! inset-0 z-0 pointer-events-none"
-      color="#82AAFF"
+      color="#017288"
       intensity={0.9}
       trailWidth={2.5}
       linger={1.1}
@@ -90,7 +90,7 @@ const aboutCol = 'flex-[1_1_100%] sm:flex-[1_1_260px] sm:border-l sm:border-line
             typeEffect="fade"
             mistakes={0.15}
             cursorStyle="bar"
-            cursorColor="#82AAFF"
+            cursorColor="#017288"
           />
         </div>
         <div class="flex flex-wrap gap-3">
@@ -111,7 +111,7 @@ const aboutCol = 'flex-[1_1_100%] sm:flex-[1_1_260px] sm:border-l sm:border-line
 
   <section class="border-t border-line py-12 sm:pt-18 sm:pb-22" id="notes">
     <div class="page-wrap">
-      <SectionHead lead={t.notes.lead} rest={t.notes.rest} aside={t.notes.aside} index="01 notes/ →" />
+      <SectionHead lead={t.notes.lead} rest={t.notes.rest} aside={t.notes.aside} index="01 notes/ →" strokeLead />
       <NotesBrowser
         client:load
         notes={summaries}

@@ -2,7 +2,7 @@
 
 /* README.me · Terminal Dark
    Depth comes from layered near-blacks and 1px hairlines, never shadows.
-   The syntax palette is the only accent system; blue (fn) leads the UI.
+   The syntax palette is the only accent system; teal (fn, #017288) leads the UI.
    Utilities: bg-canvas / bg-frame / bg-surface / bg-elevated, border-line(-strong),
    text-fg / fg-2 / fg-3 / fg-4, and kw · str · fn · num · const · err · cmt. */
 @theme {
@@ -19,7 +19,7 @@
 
   --color-kw: #c792ea;
   --color-str: #c3e88d;
-  --color-fn: #82aaff;
+  --color-fn: #017288;
   --color-num: #f78c6c;
   --color-const: #ffcb6b;
   --color-err: #f07178;
@@ -58,7 +58,7 @@
     outline-offset: 2px;
   }
   ::selection {
-    background: rgb(130 170 255 / 0.25);
+    background: rgb(1 114 136 / 0.35);
   }
 }
 
@@ -75,7 +75,7 @@
     & h1 { font-size: 26px; }
     & h2 { font-size: 22px; }
     & h3 { font-size: 18px; }
-    & a { color: var(--color-fn); border-bottom: 1px solid rgb(130 170 255 / 0.35); }
+    & a { color: var(--color-fn); border-bottom: 1px solid rgb(1 114 136 / 0.6); }
     & a:hover { border-color: var(--color-fn); }
     & strong { color: var(--color-fg); font-weight: 600; }
     & blockquote { margin: 1.6em 0; padding: 2px 0 2px 20px; border-left: 2px solid var(--color-line-strong); color: var(--color-fg-2); }
