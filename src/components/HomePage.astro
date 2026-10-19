@@ -4,7 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ReadmeCard from './ReadmeCard.astro';
 import GlowCursor from './GlowCursor';
 import TextType from './TextType';
-import WebThreads from './WebThreads';
+import Particles from './Particles';
 import SectionHead from './SectionHead.astro';
 import { btnPrimary, btnSecondary } from './ui';
 import NotesBrowser, { type NoteSummary } from './NotesBrowser';
@@ -83,7 +83,10 @@ const aboutCol = 'flex-[1_1_100%] sm:flex-[1_1_260px] sm:border-l sm:border-line
             as="h1"
             className="col-start-1 row-start-1"
             text={headline}
-            loop={false}
+            loop
+            pauseDuration={8000}
+            deleteMode="select"
+            deletingSpeed={12}
             initialDelay={400}
             typingSpeed={45}
             variableSpeed={{ min: 28, max: 85 }}
@@ -128,7 +131,7 @@ const aboutCol = 'flex-[1_1_100%] sm:flex-[1_1_260px] sm:border-l sm:border-line
   {SHOW_DRAFTS && (
     <section class="border-t border-line py-12 sm:pt-18 sm:pb-22" data-backdrop-start="0">
       <div class="page-wrap">
-        <SectionHead lead={t.prompts.lead} rest={t.prompts.rest} aside={t.prompts.aside} index="02 prompts/ →" />
+        <SectionHead lead={t.prompts.lead} rest={t.prompts.rest} aside={t.prompts.aside} index="02 prompts/ →" strokeLead />
         <dl class="border-t border-line">
           {t.prompts.items.map((p) => (
             <a class="group flex flex-wrap items-baseline gap-x-8 gap-y-1.5 border-b border-line py-5" href={NEW_NOTE_URL}>
@@ -148,6 +151,7 @@ const aboutCol = 'flex-[1_1_100%] sm:flex-[1_1_260px] sm:border-l sm:border-line
   <section class="border-t border-line py-12 sm:pt-18 sm:pb-22" id="about" data-backdrop-start={SHOW_DRAFTS ? undefined : -140}>
     <div class="page-wrap">
       <SectionHead
+        strokeLead
         lead={t.about.lead}
         rest={heading}
         restLang={aboutLang}
@@ -169,36 +173,34 @@ const aboutCol = 'flex-[1_1_100%] sm:flex-[1_1_260px] sm:border-l sm:border-line
     </div>
   </section>
 
-  <WebThreads
+  <Particles
     slot="backdrop"
     client:visible
-    colors={['#3b82f6', '#06b6d4']}
-    coreColor="#FFFFFF"
-    threadCount={9}
-    spread={0.22}
-    lightMode={false}
-    speed={0.2}
-    frequency={5}
-    taper={0.3}
-    position={0.5}
-    pinch={0.5}
-    nodes={3}
-    angle={-8}
-    glow={0.009}
-    falloff={0.6}
-    thickness={0.7}
-    brightness={0.4}
+    particleColors={['#017288', '#017288', '#ffffff']}
+    particleCount={200}
+    particleSpread={10}
+    speed={0.1}
+    particleBaseSize={100}
+    glow={0.5}
+    twinkle={0.3}
+    moveParticlesOnHover
+    hoverEffect="parallax"
+    sizeRandomness={1}
+    shape="circle"
+    depthOfField={0}
+    connections={false}
+    connectionDistance={110}
+    particleHoverFactor={1}
+    hoverRadius={140}
+    drift="none"
+    driftSpeed={1}
+    alphaParticles={false}
+    disableRotation={false}
+    cameraDistance={20}
+    variation={0}
     opacity={1}
-    depth={0.6}
-    pulses={0}
-    mirror
-    shimmer={false}
-    fade={0}
-    grain={0.05}
+    clickBurst
     intro
-    mouseInteraction
-    mouseStrength={0.5}
-    pulseOnClick
-    paused={false}
+    lightMode={false}
   />
 </BaseLayout>
