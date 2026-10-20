@@ -61,6 +61,15 @@ export default config({
           defaultValue: { kind: 'today' },
           validation: { isRequired: true },
         }),
+        lang: fields.select({
+          label: '语言',
+          description: '这篇笔记用什么语言写。中英文页面都会列出它，语言不同时会显示一个小标记。',
+          options: [
+            { label: '中文', value: 'zh' },
+            { label: 'English', value: 'en' },
+          ],
+          defaultValue: 'zh',
+        }),
         category: fields.select({
           label: '主题',
           options: CATEGORIES,
@@ -92,6 +101,15 @@ export default config({
         tags: fields.array(fields.text({ label: '标签' }), {
           label: '标签',
           itemLabel: (props) => props.value || '标签',
+        }),
+        heading_en: fields.text({ label: '标题（English）', description: '英文页面用。留空则显示中文。' }),
+        paragraphs_en: fields.array(fields.text({ label: 'Paragraph', multiline: true }), {
+          label: '介绍段落（English）',
+          itemLabel: (props) => props.value.slice(0, 40) || 'Paragraph',
+        }),
+        tags_en: fields.array(fields.text({ label: 'Tag' }), {
+          label: '标签（English）',
+          itemLabel: (props) => props.value || 'Tag',
         }),
       },
     }),

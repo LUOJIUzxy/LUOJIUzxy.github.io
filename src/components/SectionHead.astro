@@ -1,0 +1,25 @@
+---
+import StrokeWord from './StrokeWord';
+/** Asymmetric section header: two-tone headline left, description and index line right. */
+interface Props {
+  lead: string;
+  rest?: string;
+  restLang?: string;
+  aside: string;
+  index: string;
+  /** Draw the lead word with StrokeText (outline draws on, then fills). */
+  strokeLead?: boolean;
+}
+const { lead, rest, restLang, aside, index, strokeLead = false } = Astro.props;
+const leadWord = lead.trimEnd();
+const leadGap = lead.slice(leadWord.length);
+---
+<div class="mb-10 flex flex-wrap items-end gap-x-12 gap-y-5">
+  <h2 class="flex-[1_1_380px] text-[clamp(24px,3vw,36px)] leading-[1.2] font-medium tracking-[-0.015em]">
+    {strokeLead ? <><StrokeWord client:visible text={leadWord} />{leadGap}</> : lead}{rest && <span class="text-fg-2" lang={restLang}>{rest}</span>}
+  </h2>
+  <div class="flex flex-[1_1_320px] flex-col gap-2.5">
+    <p class="max-w-[36em] text-[15px] leading-[1.7] text-fg-2">{aside}</p>
+    <p class="font-mono text-[13px] text-fg-3">{index}</p>
+  </div>
+</div>

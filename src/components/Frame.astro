@@ -1,0 +1,16 @@
+---
+/**
+ * The page's one structural motif: an outer frame holding an inner surface.
+ * Radii are concentric: outer 16px − 4px gap = inner 12px.
+ */
+interface Props {
+  class?: string;
+  innerClass?: string;
+}
+const { class: className, innerClass } = Astro.props;
+---
+<div class:list={['min-w-0 rounded-2xl border border-line bg-frame p-1', className]}>
+  <div class:list={['overflow-hidden rounded-xl border border-line bg-surface', innerClass]}>
+    <slot />
+  </div>
+</div>

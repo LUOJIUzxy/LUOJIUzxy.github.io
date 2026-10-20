@@ -1,11 +1,12 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import type { Locale } from '../i18n';
 
 export type Note = CollectionEntry<'notes'>;
+type Category = Note['data']['category'];
 
-export const CATEGORY_LABELS: Record<Note['data']['category'], string> = {
-  therapy: '心理治疗',
-  life: '生活随记',
-  making: '技术与创造',
+export const CATEGORY_LABELS: Record<Locale, Record<Category, string>> = {
+  zh: { therapy: '心理治疗', life: '生活随记', making: '技术与创造' },
+  en: { therapy: 'Therapy', life: 'Life', making: 'Making' },
 };
 
 /** Drafts are visible in `npm run dev` only — never in a production build. */
@@ -14,6 +15,15 @@ export const SHOW_DRAFTS = import.meta.env.DEV;
 export async function getVisibleNotes(): Promise<Note[]> {
   const all = await getCollection('notes', ({ data }) => SHOW_DRAFTS || data.status === 'published');
   return all.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+}
+
+/** Shared by /notes/[slug] and /en/notes/[slug]. */
+export async function getNotePaths() {
+  const notes = await getVisibleNotes();
+  return notes.map((note, i) => ({
+    params: { slug: note.id },
+    props: { note, newer: notes[i - 1], older: notes[i + 1] },
+  }));
 }
 
 export function formatDate(d: Date, sep = ' / '): string {

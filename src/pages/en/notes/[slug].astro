@@ -1,0 +1,15 @@
+---
+import NoteArticle from '../../../components/NoteArticle.astro';
+import { getNotePaths, type Note } from '../../../lib/notes';
+
+export async function getStaticPaths() {
+  return getNotePaths();
+}
+
+interface Props {
+  note: Note;
+  newer?: Note;
+  older?: Note;
+}
+---
+<NoteArticle locale="en" {...Astro.props} />

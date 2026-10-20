@@ -1,0 +1,206 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ReadmeCard from './ReadmeCard.astro';
+import GlowCursor from './GlowCursor';
+import TextType from './TextType';
+import Particles from './Particles';
+import SectionHead from './SectionHead.astro';
+import { btnPrimary, btnSecondary } from './ui';
+import NotesBrowser, { type NoteSummary } from './NotesBrowser';
+import { ui, notePath, type Locale } from '../i18n';
+import {
+  CATEGORY_LABELS,
+  NEW_NOTE_URL,
+  SHOW_DRAFTS,
+  excerptOf,
+  formatDate,
+  getVisibleNotes,
+  plainText,
+} from '../lib/notes';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = ui[locale];
+const labels = CATEGORY_LABELS[locale];
+
+const notes = await getVisibleNotes();
+const summaries: NoteSummary[] = notes.map((n) => ({
+  href: notePath(locale, n.id),
+  title: n.data.title,
+  date: formatDate(n.data.date, '-'),
+  category: labels[n.data.category],
+  excerpt: excerptOf(n),
+  searchText: plainText(n.body).slice(0, 3000),
+  draft: n.data.status === 'draft',
+  lang: ui[n.data.lang].htmlLang,
+  langBadge: n.data.lang === locale ? undefined : t.otherLang,
+}));
+
+// The README card always reports the public state, even in local dev.
+const published = (await getCollection('notes', ({ data }) => data.status === 'published')).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
+);
+const updated = published[0] ? formatDate(published[0].data.date, '-') : null;
+
+// English about fields fall back to Chinese when left empty.
+const about = (await getEntry('site', 'about'))?.data;
+const useEn = locale === 'en' && !!about?.heading_en;
+const aboutLang = useEn || locale === 'zh' ? t.htmlLang : ui.zh.htmlLang;
+const heading = useEn ? about?.heading_en : about?.heading;
+const paragraphs = (locale === 'en' && about?.paragraphs_en.length ? about.paragraphs_en : about?.paragraphs) ?? [];
+const tags = (locale === 'en' && about?.tags_en.length ? about.tags_en : about?.tags) ?? [];
+const categories = Object.values(labels);
+const headline = `${t.hero.lead}${t.hero.rest}`;
+// Columns divided by hairline rules, not cards.
+const aboutCol = 'flex-[1_1_100%] sm:flex-[1_1_260px] sm:border-l sm:border-line sm:px-10 sm:first:border-l-0 sm:first:pl-0';
+---
+
+<BaseLayout locale={locale}>
+  <div class="relative">
+    <GlowCursor
+      client:idle
+      className="absolute! inset-0 z-0 pointer-events-none"
+      color="#017288"
+      intensity={0.9}
+      trailWidth={2.5}
+      linger={1.1}
+      glow={1}
+      hotspot={0.6}
+      quality="medium"
+      theme="dark"
+    />
+    <section class="page-wrap relative z-[1] flex flex-wrap items-start gap-9 pt-10 pb-14 sm:gap-12 sm:pt-18 sm:pb-22">
+      <div class="flex min-w-0 flex-[1_1_400px] flex-col gap-8 pt-2">
+        <p class="font-mono text-[13px] text-fg-3">{t.hero.meta(published.length, updated)}</p>
+        <!-- The invisible copy reserves the final height, so the buttons don't jump while the headline types. -->
+        <div class="grid text-[clamp(30px,3.6vw,44px)] leading-[1.2] font-medium tracking-[-0.015em]">
+          <p class="invisible col-start-1 row-start-1" aria-hidden="true">{headline}</p>
+          <TextType
+            client:load
+            as="h1"
+            className="col-start-1 row-start-1"
+            text={headline}
+            loop
+            pauseDuration={8000}
+            deleteMode="select"
+            deletingSpeed={12}
+            initialDelay={400}
+            typingSpeed={45}
+            variableSpeed={{ min: 28, max: 85 }}
+            typeEffect="fade"
+            mistakes={0.15}
+            cursorStyle="bar"
+            cursorColor="#017288"
+          />
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <a class={btnPrimary} href="#notes">{t.hero.read}</a>
+          <a class={btnSecondary} href="#about">{t.hero.about}</a>
+        </div>
+      </div>
+      <ReadmeCard
+        class="flex-[1_1_520px]"
+        t={t.readme}
+        tagline={heading || t.readme.fallbackTagline}
+        categories={categories}
+        published={published.length}
+        updated={updated}
+      />
+    </section>
+  </div>
+
+  <section class="border-t border-line py-12 sm:pt-18 sm:pb-22" id="notes">
+    <div class="page-wrap">
+      <SectionHead lead={t.notes.lead} rest={t.notes.rest} aside={t.notes.aside} index="01 notes/ →" strokeLead />
+      <NotesBrowser
+        client:load
+        notes={summaries}
+        categories={categories}
+        t={t.browser}
+        writeUrl={SHOW_DRAFTS ? NEW_NOTE_URL : undefined}
+      />
+      {SHOW_DRAFTS && (
+        <p class="mt-4 text-[13px] text-fg-3"><span class="mr-1.5 font-mono text-const">dev</span>{t.notes.localNote}</p>
+      )}
+    </div>
+  </section>
+
+  {SHOW_DRAFTS && (
+    <section class="border-t border-line py-12 sm:pt-18 sm:pb-22" data-backdrop-start="0">
+      <div class="page-wrap">
+        <SectionHead lead={t.prompts.lead} rest={t.prompts.rest} aside={t.prompts.aside} index="02 prompts/ →" strokeLead />
+        <dl class="border-t border-line">
+          {t.prompts.items.map((p) => (
+            <a class="group flex flex-wrap items-baseline gap-x-8 gap-y-1.5 border-b border-line py-5" href={NEW_NOTE_URL}>
+              <dt class="w-36 text-sm text-fg-3">{p.key}</dt>
+              <dd class="flex flex-[1_1_360px] flex-col gap-1">
+                <span class="text-[17px] font-medium transition-colors group-hover:text-fn">{p.title}</span>
+                <span class="text-sm text-fg-2">{p.text}</span>
+              </dd>
+              <span class="text-fg-3" aria-hidden="true">↗</span>
+            </a>
+          ))}
+        </dl>
+      </div>
+    </section>
+  )}
+
+  <section class="border-t border-line py-12 sm:pt-18 sm:pb-22" id="about" data-backdrop-start={SHOW_DRAFTS ? undefined : -140}>
+    <div class="page-wrap">
+      <SectionHead
+        strokeLead
+        lead={t.about.lead}
+        rest={heading}
+        restLang={aboutLang}
+        aside={t.about.aside}
+        index={`${SHOW_DRAFTS ? '03' : '02'} about/ →`}
+      />
+      <div class="flex flex-wrap gap-y-8" lang={aboutLang}>
+        {paragraphs.map((p) => (
+          <div class={aboutCol}><p class="text-[15px] leading-[1.75] text-fg-2">{p}</p></div>
+        ))}
+        {tags.length > 0 && (
+          <div class={aboutCol}>
+            <ul class="flex flex-wrap gap-2" aria-label={t.about.tags}>
+              {tags.map((tag) => <li class="rounded-md border border-line-strong px-2.5 py-0.5 text-[13px] text-fg-2">{tag}</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <Particles
+    slot="backdrop"
+    client:visible
+    particleColors={['#017288', '#017288', '#ffffff']}
+    particleCount={200}
+    particleSpread={10}
+    speed={0.1}
+    particleBaseSize={100}
+    glow={0.5}
+    twinkle={0.3}
+    moveParticlesOnHover
+    hoverEffect="parallax"
+    sizeRandomness={1}
+    shape="circle"
+    depthOfField={0}
+    connections={false}
+    connectionDistance={110}
+    particleHoverFactor={1}
+    hoverRadius={140}
+    drift="none"
+    driftSpeed={1}
+    alphaParticles={false}
+    disableRotation={false}
+    cameraDistance={20}
+    variation={0}
+    opacity={1}
+    clickBurst
+    intro
+    lightMode={false}
+  />
+</BaseLayout>
