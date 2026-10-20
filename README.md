@@ -45,30 +45,31 @@ Chinese is the default and lives at `/`; English mirrors every page under `/en/`
 
 Each note has a **状态** field:
 
-| Status | Local dev | Public site | Private repo |
+| Status | Local dev | Live site | GitHub repo |
 |---|---|---|---|
-| 草稿 (draft, the default) | shown with a “草稿” badge | **not built** | yes |
+| 草稿 (draft, the default) | shown with a “草稿” badge | **not built** | yes, readable by anyone |
 | 公开 (published) | shown | shown | yes |
 
-- Drafts never reach the built site. They are still committed to the repo, so anyone you give repo access can read them. Keep the repo private.
-- Anything set to 公开 is public on the internet. Re-read before switching.
+- **This repo is public** (GitHub Pages user sites on a free account have to be). Drafts are never built into the live site, but every committed `.mdoc` file, drafts included, can be read on GitHub, and stays in the git history even after you delete it.
+- To keep a draft fully private, don't commit it: write it locally and only commit once it's set to 公开.
+- Anything set to 公开 is public on the live site. Re-read before switching.
 - The “写一篇” buttons and writing prompts on the home page appear only in `npm run dev`.
 
-## Deploy (Vercel + Keystatic GitHub mode)
+## Deploy (GitHub Pages)
 
-1. **Create the private repo and push**
+The site is a fully static build served at **https://luojiuzxy.github.io**. `.github/workflows/deploy.yml` builds and publishes it on every push to `main`.
+
+One-time setup:
+
+1. Rename the repo to `LUOJIUzxy.github.io` and make it public (repo Settings → General).
+2. Point your local clone at the new name:
    ```bash
-   gh repo create phoebe-slow-notes --private --source . --push
+   git remote set-url origin git@github.com:LUOJIUzxy/LUOJIUzxy.github.io.git
    ```
-2. **Import it in Vercel** (Framework: Astro, no other settings needed). Set `site` in `astro.config.mjs` to your domain.
-3. **Turn on GitHub mode for Keystatic**, so you can write at `https://your-domain/keystatic` from any device:
-   - Add Vercel env vars `PUBLIC_KEYSTATIC_STORAGE=github` and `PUBLIC_KEYSTATIC_GITHUB_REPO=<owner>/phoebe-slow-notes`.
-   - Locally, put the same two lines in `.env`, run `npm run dev` and open `/keystatic`. Keystatic walks you through creating a GitHub App and writes `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`, `KEYSTATIC_SECRET` and `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` into `.env`.
-   - Copy those four values into Vercel's env vars. In the GitHub App settings, add `https://your-domain/api/keystatic/github/oauth/callback` as a callback URL. Install the App on the repo only.
-   - Redeploy. Only GitHub accounts with write access to the repo can sign in to `/keystatic`. Each save is a commit, and each commit triggers a redeploy.
-   - Remove the two `PUBLIC_KEYSTATIC_*` lines from your local `.env` again if you want local mode back for offline writing.
+3. Repo Settings → Pages → Build and deployment → Source: **GitHub Actions**.
+4. Merge your work into `main` and push. The Actions tab shows the deploy; the site is live a minute or two later.
 
-Not using Vercel? Replace `@astrojs/vercel` with `@astrojs/node`, `@astrojs/netlify` or `@astrojs/cloudflare` in `astro.config.mjs`. Only `/keystatic` and `/api/keystatic` need a server. Every other page is static.
+Writing: Keystatic's editor needs a server, which GitHub Pages doesn't have, so `/keystatic` only exists in `npm run dev`. Write locally, commit, push to `main`.
 
 ## Bring over notes from the old prototype
 
